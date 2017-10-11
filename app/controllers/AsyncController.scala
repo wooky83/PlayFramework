@@ -4,7 +4,6 @@ import javax.inject._
 
 import akka.actor.ActorSystem
 import play.api.mvc._
-
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
