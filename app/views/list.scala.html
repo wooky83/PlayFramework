@@ -1,14 +1,14 @@
-@import model.Member
 @(members: Set[Member])
 
 @main("list") {
     @for(member <- members) {
-    <p>순서 : @member.mid</p>
-    <p>아이디 : @member.userId</p>
-    <p>비밀번호 : @member.password</p>
-    <p>닉네임 : @member.nickname</p>
-    <p>이메일 : @member.email</p>
-    <p>등록일자 : @member.regdate</p>
-    <br>
+        <p>순서 : @member.mid</p>
+        <p>아이디 : @member.userId</p>
+        <p>비밀번호 : @member.password</p>
+        <p>닉네임 : @member.nickname</p>
+        <p>이메일 : @member.email</p>
+        <p>등록일자 : @member.regdate</p>
+        <br>
     }
 }
+

@@ -1,7 +1,6 @@
-package model
+package models
 
-import java.util.Date
-import java.util.Calendar
+import java.util.{Calendar, Date}
 
 case class Member (mid:Int, userId:String, password:String, nickname:String, email:String, regdate:Option[Date])
 

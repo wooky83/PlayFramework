@@ -16,3 +16,9 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 GET     /list                       controllers.HomeController.list
 
 GET     /listDB                     controllers.HomeController.listDB
+
+GET     /form                     controllers.HomeController.form
+
+POST     /save                     controllers.HomeController.save
+
+POST     /uploadFile               controllers.HomeController.uploadFile

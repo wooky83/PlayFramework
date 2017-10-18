@@ -1,10 +1,11 @@
-package model
+package models
 
-import javax.inject._
-import play.api.db.DBApi
-import anorm._
-import anorm.SqlParser._
 import java.util.Date
+import javax.inject._
+
+import anorm.SqlParser._
+import anorm._
+import play.api.db.DBApi
 
 @Singleton
 class MemberService @Inject() (dbapi: DBApi){
@@ -25,6 +26,24 @@ class MemberService @Inject() (dbapi: DBApi){
   def getList = db.withConnection { implicit connection =>
     SQL("SELECT * FROM member").as(basicMember *)
 
+  }
+
+  def insert(member: Member): Unit = {
+    db.withConnection { implicit connection =>
+      SQL(
+        """
+          insert into member (userId, password, nickname, email, regdate)
+          values ( {userId}, {password}, {nickname}, {email}, {regdate})
+        """
+      ).on(
+        'userId -> member.userId,
+        'password -> member.password,
+        'nickname -> member.nickname,
+        'email -> member.email,
+        'regdate -> member.regdate
+      ).executeUpdate()
+
+    }
   }
 }
 
