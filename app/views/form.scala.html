@@ -2,6 +2,7 @@
 @import helper._
 
 @helper.form(action = routes.HomeController.save()) {
+@helper.CSRF.formField
 @inputText(joinForm("mid"), '_label -> "회원번호")
 @inputText(joinForm("userId"), '_label -> "회원아이디")
 @inputPassword(joinForm("password"), '_label -> "비밀번호")
