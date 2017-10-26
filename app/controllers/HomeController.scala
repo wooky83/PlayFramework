@@ -4,27 +4,31 @@ import javax.inject._
 
 import play.api._
 import play.api.mvc._
-import models.{Member, MemberService}
+import models.{Member, PeopleDataAccess, Person}
 import play.api.data
 import play.api.data.Forms._
 import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
 import play.api.i18n._
 import play.api.Play.current
+import play.api.data.validation.Constraints.{max, min}
+import play.api.libs.json._
+
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
- * This controller creates an `Action` to handle HTTP requests to the
- * application's home page.
- */
+  * This controller creates an `Action` to handle HTTP requests to the
+  * application's home page.
+  */
 @Singleton
-class HomeController @Inject()(cc: ControllerComponents, ms: MemberService, messagesAction: MessagesActionBuilder) extends AbstractController(cc){
+class HomeController @Inject()(cc: MessagesControllerComponents, messagesAction: MessagesActionBuilder, md: PeopleDataAccess)(implicit ec: ExecutionContext) extends MessagesAbstractController(cc){
 
   /**
-   * Create an Action to render an HTML page with a welcome message.
-   * The configuration in the `routes` file means that this method
-   * will be called when the application receives a `GET` request with
-   * a path of `/`.
-   */
+    * Create an Action to render an HTML page with a welcome message.
+    * The configuration in the `routes` file means that this method
+    * will be called when the application receives a `GET` request with
+    * a path of `/`.
+    */
   def index = Action {
     Ok(views.html.index("Hello World!!!?"))
   }
@@ -33,26 +37,25 @@ class HomeController @Inject()(cc: ControllerComponents, ms: MemberService, mess
     Ok(views.html.list(Member.getList))
   }
 
-  def listDB = Action {
-    Ok(views.html.listDB(ms.getList))
+  def jsonTest = Action {
+    Ok(Json.toJson(Map("first"->1, "second"->2)))
   }
 
   def form = messagesAction { implicit request: MessagesRequest[AnyContent] =>
     Ok(views.html.form(joinForm))
   }
 
-  def save = Action { implicit request =>
-    val form = joinForm.bindFromRequest()
-    println("whywhyLookHere~!!")
-    form.fold(
-      hasErrors => {
-        println(hasErrors)
-        Redirect(routes.HomeController.form)
+  def save = Action.async { implicit request =>
+    joinForm.bindFromRequest.fold(
+      errorForm => {
+        Future.successful(Ok(views.html.form(errorForm)))
       },
-      member => {
-        ms.insert(member)
-        Redirect(routes.HomeController.listDB)
-      })
+      person => {
+        md.insert(person.userId, person.password, person.nickname, person.score, person.level, person.regdate).map { _ =>
+          Redirect(routes.HomeController.getPersons)
+        }
+      }
+    )
   }
 
   def uploadFile = Action(parse.multipartFormData) { request =>
@@ -68,12 +71,22 @@ class HomeController @Inject()(cc: ControllerComponents, ms: MemberService, mess
 
   }
 
-  val joinForm = Form(
+  val joinForm = Form {
     mapping(
-      "mid" -> ignored(0),
       "userId" -> nonEmptyText,
       "password" -> nonEmptyText,
       "nickname" -> nonEmptyText,
-      "email" -> nonEmptyText,
-      "regdate" -> optional(date("yyyy-MM-dd")))(Member.apply)(Member.unapply _))
+      "score" -> number.verifying(min(0), max(100)),
+      "level" -> number.verifying(min(0), max(100)),
+      "regdate" -> sqlDate("yyyy-MM-dd")
+    )(CreatePersonForm.apply)(CreatePersonForm.unapply _)
+  }
+
+  def getPersons = Action.async { implicit request =>
+    md.list.map { people =>
+      Ok(Json.toJson(people))
+    }
+  }
 }
+
+case class CreatePersonForm(userId: String, password: String, nickname: String, score: Int, level: Int, regdate: java.sql.Date)

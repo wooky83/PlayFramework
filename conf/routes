@@ -15,10 +15,12 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 # An example controller showing a sample home page
 GET     /list                       controllers.HomeController.list
 
-GET     /listDB                     controllers.HomeController.listDB
+GET     /jsonTest                     controllers.HomeController.jsonTest
 
 GET     /form                     controllers.HomeController.form
 
 POST     /save                     controllers.HomeController.save
 
 POST     /uploadFile               controllers.HomeController.uploadFile
+
+GET     /getPersons                     controllers.HomeController.getPersons
